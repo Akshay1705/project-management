@@ -14,7 +14,9 @@ class TaskController extends Controller
     }
 
     public function create(){
-        return inertia('Tasks/Create');
+        $projects = \App\Models\Project::all();
+        $users = \App\Models\User::all()->except(auth()->id());
+        return inertia('Tasks/Create', ['projects' => $projects, 'users' => $users]);
     }
 
     public function store(Request $request){
@@ -28,12 +30,23 @@ class TaskController extends Controller
             'due_date' => 'nullable|date|after_or_equal:today',
         ]);
 
-        Task::create($request->all());
+        Task::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'status' => $request->status,
+            'priority' => $request->priority,
+            'project_id' => $request->project_id,
+            'assigned_to' => $request->assigned_to,
+            'due_date' => $request->due_date,
+        ]);
+        
         return redirect()->route('tasks.index');
     }
 
     public function edit(Task $task){
-        return inertia('Tasks/Edit', ['task' => $task]);
+        $projects = \App\Models\Project::all();
+        $users = \App\Models\User::all()->except(auth()->id());
+        return inertia('Tasks/Edit', ['task' => $task, 'projects' => $projects, 'users' => $users]);
     }
 
     public function update(Request $request, Task $task){
@@ -47,7 +60,16 @@ class TaskController extends Controller
             'due_date' => 'nullable|date|after_or_equal:today',
         ]);
 
-        $task->update($request->all());
+        $task->update([
+            'title' => $request->title,
+            'description' => $request->description,
+            'status' => $request->status,
+            'priority' => $request->priority,
+            'project_id' => $request->project_id,
+            'assigned_to' => $request->assigned_to,
+            'due_date' => $request->due_date,
+        ]);
+        
         return redirect()->route('tasks.index');
     }
 

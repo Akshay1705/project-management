@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->char('status', 10)->default('todo');
-            $table->string('priority', 10)->default('medium');
+            $table->char('status', 20)->default('todo');
+            $table->string('priority', 20)->default('medium');
             $table->unsignedBigInteger('project_id');
             $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
             $table->unsignedBigInteger('assigned_to')->nullable();

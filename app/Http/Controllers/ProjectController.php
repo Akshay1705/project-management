@@ -26,7 +26,14 @@ class ProjectController extends Controller
             'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
 
-        Project::create($request->all());
+        $project = Project::create([
+            'name' => $request->name,
+            'description' => $request->description,
+            'status' => $request->status,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'created_by' => auth()->id(),
+        ]);
 
         return redirect()->route('projects.index');
     }
@@ -44,7 +51,13 @@ class ProjectController extends Controller
             'end_date' => 'nullable|date|after_or_equal:start_date',
         ]);
 
-        $project->update($request->all());
+        $project->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'status' => $request->status,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+        ]);
 
         return redirect()->route('projects.index');
     }
