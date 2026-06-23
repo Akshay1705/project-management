@@ -49,7 +49,7 @@ class TaskController extends Controller
     }
 
     public function edit(Task $task){
-        $projects = \App\Models\Project::all();  
+        $projects = \App\Models\Project::all();
         $users = \App\Models\User::all()->except(auth()->id());
         return inertia('Tasks/Edit', ['task' => $task, 'projects' => $projects, 'users' => $users]);
     }
