@@ -39,7 +39,7 @@ const DashboardLayout = ({ children }) => {
                 </aside>
 
                 <main className="ml-64 flex-1 p-8 transition-all duration-200">
-                    <div className="mx-auto max-auto max-w-7xl">
+                    <div className="max-auto max-w-7xl">
                         {children}
                     </div>
                 </main>
