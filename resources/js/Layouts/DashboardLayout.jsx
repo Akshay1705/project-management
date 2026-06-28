@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Link, usePage, router } from "@inertiajs/react";
+import { Link, router } from "@inertiajs/react";
 import Dropdown from "@/Components/Dropdown";
 import Logo from "@/assets/logo_pm.png";
+import { usePage } from "@inertiajs/react";
 
 // ─── Icons (inline SVG to avoid any icon lib dependency) ──────────────────────
 const Icon = {
@@ -46,30 +47,6 @@ const Icon = {
         </svg>
     ),
 };
-
-// ─── Sidebar nav data ─────────────────────────────────────────────────────────
-const NAV = [
-    {
-        label: "Project Management",
-        icon: <Icon.Folder />,
-        children: [
-            { label: "Create new", href: "/projects/create" },
-            { label: "Project list view", href: "/projects" },
-            { label: "Project card view", href: "/projects/card" },
-            { label: "Project board view", href: "/projects?view=board" },
-            { label: "Project details", href: "/projects/details" },
-        ],
-    },
-    {
-        label: "Tasks",
-        icon: <Icon.Task />,
-        children: [
-            { label: "All Tasks", href: "/tasks" },
-            { label: "My Tasks", href: "/tasks/mine" },
-            { label: "Create Task", href: "/tasks/create" },
-        ],
-    },
-];
 
 // ─── Single nav item ──────────────────────────────────────────────────────────
 function NavItem({ item, currentPath }) {
@@ -140,18 +117,55 @@ export default function DashboardLayout({ children }) {
     const [collapsed, setCollapsed] = useState(false);
     const [search, setSearch] = useState("");
 
+    // ─── Sidebar nav data ─────────────────────────────────────────────────────────
+    const permissions = auth.user?.permissions || [];
+
+    const NAV = [
+        {
+            label: "Project Management",
+            icon: <Icon.Folder />,
+            children: [
+                ...(permissions.includes("create projects")
+                    ? [{ label: "Create new", href: "/projects/create" }]
+                    : []),
+
+                { label: "Project list view", href: "/projects" },
+                { label: "Project card view", href: "/projects/card" },
+                { label: "Project board view", href: "/projects?view=board" },
+                { label: "Project details", href: "/projects/details" },
+            ],
+        },
+
+        {
+            label: "Tasks",
+            icon: <Icon.Task />,
+            children: [
+                { label: "All Tasks", href: "/tasks" },
+                { label: "My Tasks", href: "/tasks/mine" },
+
+                ...(permissions.includes("create tasks")
+                    ? [{ label: "Create Task", href: "/tasks/create" }]
+                    : []),
+            ],
+        },
+    ];
+
     const handleLogout = () => {
         router.post(route("logout"));
     };
 
     // Avatar initials fallback
     const initials = user?.name
-        ? user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
+        ? user.name
+              .split(" ")
+              .map((n) => n[0])
+              .join("")
+              .toUpperCase()
+              .slice(0, 2)
         : "U";
 
     return (
         <div className="flex min-h-screen bg-gray-100 text-gray-800">
-
             {/* ── Sidebar ─────────────────────────────────────────────────── */}
             <aside
                 className={`fixed left-0 top-[60px] bottom-0 z-30
@@ -160,19 +174,27 @@ export default function DashboardLayout({ children }) {
             >
                 {/* Nav */}
                 <nav className="flex-1 overflow-y-auto px-2  py-4 space-y-.5">
-                    {!collapsed && NAV.map((item, i) => (
-                        <NavItem key={i} item={item} currentPath={currentPath} />
-                    ))}
-                    {collapsed && NAV.map((item, i) => (
-                        <Link
-                            key={i}
-                            href={item.href || item.children?.[0]?.href || "#"}
-                            title={item.label}
-                            className="flex items-center justify-center p-2.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
-                        >
-                            {item.icon}
-                        </Link>
-                    ))}
+                    {!collapsed &&
+                        NAV.map((item, i) => (
+                            <NavItem
+                                key={i}
+                                item={item}
+                                currentPath={currentPath}
+                            />
+                        ))}
+                    {collapsed &&
+                        NAV.map((item, i) => (
+                            <Link
+                                key={i}
+                                href={
+                                    item.href || item.children?.[0]?.href || "#"
+                                }
+                                title={item.label}
+                                className="flex items-center justify-center p-2.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+                            >
+                                {item.icon}
+                            </Link>
+                        ))}
                 </nav>
 
                 {/* Collapse toggle */}
@@ -182,7 +204,9 @@ export default function DashboardLayout({ children }) {
                         className={`flex items-center gap-2 w-full px-2 py-2 rounded-lg text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors
                             ${collapsed ? "justify-center" : ""}`}
                     >
-                        <span className={`transition-transform duration-200 ${collapsed ? "rotate-180" : ""}`}>
+                        <span
+                            className={`transition-transform duration-200 ${collapsed ? "rotate-180" : ""}`}
+                        >
                             <Icon.Collapse />
                         </span>
                         {!collapsed && "Collapsed View"}
@@ -216,13 +240,13 @@ export default function DashboardLayout({ children }) {
                             type="text"
                             placeholder="Search..."
                             value={search}
-                            onChange={e => setSearch(e.target.value)}
-                            className="flex-1 bg-transparent !border-0 focus:!border-0 outline-none ring-0 focus:ring-0 shadow-none text-sm text-gray-700 placeholder-gray-400" />
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="flex-1 bg-transparent !border-0 focus:!border-0 outline-none ring-0 focus:ring-0 shadow-none text-sm text-gray-700 placeholder-gray-400"
+                        />
                     </div>
 
                     {/* Right side */}
                     <div className="flex items-center gap-3">
-
                         {/* Notification bell */}
                         <button className="relative p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors">
                             <Icon.Bell />
@@ -248,27 +272,31 @@ export default function DashboardLayout({ children }) {
                                 </Dropdown.Trigger>
                                 <Dropdown.Content align="right" width="48">
                                     <div className="px-4 py-2 border-b border-gray-100">
-                                        <p className="text-sm font-semibold text-gray-800">{user?.name}</p>
-                                        <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                                        <p className="text-sm font-semibold text-gray-800">
+                                            {user?.name}
+                                        </p>
+                                        <p className="text-xs text-gray-500 truncate">
+                                            {user?.email}
+                                        </p>
                                     </div>
                                     <Dropdown.Link href={route("profile.edit")}>
                                         Profile
                                     </Dropdown.Link>
-                                    <Dropdown.Link href={route("logout")} method="post" as="button">
+                                    <Dropdown.Link
+                                        href={route("logout")}
+                                        method="post"
+                                        as="button"
+                                    >
                                         Log Out
                                     </Dropdown.Link>
                                 </Dropdown.Content>
                             </Dropdown>
                         </div>
-
                     </div>
                 </header>
 
                 {/* ── Page content ─────────────────────────────────────────── */}
-                <main className="max-auto max-w-7xl">
-                    {children}
-                </main>
-
+                <main className="max-auto max-w-7xl">{children}</main>
             </div>
         </div>
     );

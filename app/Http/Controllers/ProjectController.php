@@ -8,11 +8,12 @@ use App\Models\Tag;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class ProjectController extends Controller
 {
-    // ─── Shared dropdown data ────────────────────────────────
+    // Shared dropdown data
     private function getFormData(): array
     {
         return [
@@ -20,13 +21,23 @@ class ProjectController extends Controller
             'clients' => Client::select('id', 'name')->get(),
             'tags' => Tag::select('id', 'name')->get(),
             'users' => User::select('id', 'name')->get(),
-            'admins' => User::select('id', 'name')->where('role', 'admin')->get(),
-            'taskViews' => ['technical', 'external', 'organizational'],
-            'privacyOptions' => ['Data Privacy One', 'Data Privacy Two', 'Data Privacy Three'],
+            'admins' => User::role('admin')
+                ->select('id', 'name')
+                ->get(),
+            'taskViews' => [
+                'technical',
+                'external',
+                'organizational'
+            ],
+            'privacyOptions' => [
+                'Data Privacy One',
+                'Data Privacy Two',
+                'Data Privacy Three'
+            ],
         ];
     }
 
-    // ─── Index ───────────────────────────────────────────────
+    // Project listing
     public function index()
     {
         $projects = Project::with([
@@ -35,19 +46,22 @@ class ProjectController extends Controller
             'projectLead',
             'users',
             'tags',
-        ])->withCount([
-            'tasks',
-            'tasks as completed_tasks_count' => function ($q) {
-                $q->where('status', 'completed');
-            },
-        ])->get();
+        ])
+            ->withCount([
+                'tasks',
+                'tasks as completed_tasks_count' => function ($query) {
+                    $query->where('status', 'completed');
+                },
+            ])
+            ->latest()
+            ->get();
 
         return Inertia::render('Projects/Index', [
             'projects' => $projects,
         ]);
     }
 
-    // ─── Card View ───────────────────────────────────────────────
+    // Card view
     public function cardView()
     {
         $projects = Project::with([
@@ -56,25 +70,31 @@ class ProjectController extends Controller
             'projectLead',
             'users',
             'tags',
-        ])->withCount([
-            'tasks',
-            'tasks as completed_tasks_count' => function ($q) {
-                $q->where('status', 'completed');
-            },
-        ])->get();
+        ])
+            ->withCount([
+                'tasks',
+                'tasks as completed_tasks_count' => function ($query) {
+                    $query->where('status', 'completed');
+                },
+            ])
+            ->latest()
+            ->get();
 
         return Inertia::render('Projects/CardView', [
             'projects' => $projects,
         ]);
     }
 
-    // ─── Create ──────────────────────────────────────────────
+    // Create form
     public function create()
     {
-        return Inertia::render('Projects/Create', $this->getFormData());
+        return Inertia::render(
+            'Projects/Create',
+            $this->getFormData()
+        );
     }
 
-    // ─── Store ───────────────────────────────────────────────
+    // Store project
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -87,11 +107,12 @@ class ProjectController extends Controller
             'project_lead_id' => 'nullable|exists:users,id',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
-            'description' => 'nullable|string',  // project overview
             'client_id' => 'nullable|exists:clients,id',
             'budget' => 'nullable|numeric|min:0',
+
             'people' => 'nullable|array',
             'people.*' => 'exists:users,id',
+
             'tags' => 'nullable|array',
             'tags.*' => 'exists:tags,id',
         ]);
@@ -108,39 +129,51 @@ class ProjectController extends Controller
             'end_date' => $validated['end_date'] ?? null,
             'client_id' => $validated['client_id'] ?? null,
             'budget' => $validated['budget'] ?? null,
-            'created_by' => auth()->id(),
+            'created_by' => Auth::id(),
         ]);
 
-        // Sync pivot tables
-        if (! empty($validated['people'])) {
-            $project->users()->sync($validated['people']);
-        }
+        $project->users()->sync(
+            $validated['people'] ?? []
+        );
 
-        if (! empty($validated['tags'])) {
-            $project->tags()->sync($validated['tags']);
-        }
+        $project->tags()->sync(
+            $validated['tags'] ?? []
+        );
 
-        return redirect()->route('projects.index')
+        return redirect()
+            ->route('projects.index')
             ->with('success', 'Project created successfully.');
     }
 
-    // ─── Edit ────────────────────────────────────────────────
+    // Edit form
     public function edit(Project $project)
     {
-        $project->load(['team', 'client', 'projectLead', 'users', 'tags']);
+        $project->load([
+            'team',
+            'client',
+            'projectLead',
+            'users',
+            'tags'
+        ]);
 
-        return Inertia::render('Projects/Edit', array_merge(
-            $this->getFormData(),
-            [
-                'project' => array_merge($project->toArray(), [
-                    'people' => $project->users->pluck('id'),
-                    'tags' => $project->tags->pluck('id'),
-                ]),
-            ]
-        ));
+        return Inertia::render(
+            'Projects/Edit',
+            array_merge(
+                $this->getFormData(),
+                [
+                    'project' => array_merge(
+                        $project->toArray(),
+                        [
+                            'people' => $project->users->pluck('id'),
+                            'tags' => $project->tags->pluck('id'),
+                        ]
+                    ),
+                ]
+            )
+        );
     }
 
-    // ─── Update ──────────────────────────────────────────────
+    // Update project
     public function update(Request $request, Project $project)
     {
         $validated = $request->validate([
@@ -155,8 +188,10 @@ class ProjectController extends Controller
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'client_id' => 'nullable|exists:clients,id',
             'budget' => 'nullable|numeric|min:0',
+
             'people' => 'nullable|array',
             'people.*' => 'exists:users,id',
+
             'tags' => 'nullable|array',
             'tags.*' => 'exists:tags,id',
         ]);
@@ -175,22 +210,29 @@ class ProjectController extends Controller
             'budget' => $validated['budget'] ?? null,
         ]);
 
-        // Sync pivot tables
-        $project->users()->sync($validated['people'] ?? []);
-        $project->tags()->sync($validated['tags'] ?? []);
+        $project->users()->sync(
+            $validated['people'] ?? []
+        );
 
-        return redirect()->route('projects.index')
+        $project->tags()->sync(
+            $validated['tags'] ?? []
+        );
+
+        return redirect()
+            ->route('projects.index')
             ->with('success', 'Project updated successfully.');
     }
 
-    // ─── Destroy ─────────────────────────────────────────────
+    // Delete project
     public function destroy(Project $project)
     {
         $project->users()->detach();
         $project->tags()->detach();
+
         $project->delete();
 
-        return redirect()->route('projects.index')
+        return redirect()
+            ->route('projects.index')
             ->with('success', 'Project deleted successfully.');
     }
 }

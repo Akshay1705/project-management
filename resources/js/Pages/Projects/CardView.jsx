@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Link, router } from "@inertiajs/react";
+import { usePage, Link, router } from "@inertiajs/react";
 import DashboardLayout from "@/Layouts/DashboardLayout";
 import { List, LayoutGrid } from "lucide-react";
 
@@ -160,6 +160,8 @@ export default function CardView({ projects = [] }) {
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
     const currentPath = window.location.pathname;
+    const { auth } = usePage().props;
+    const permissions = auth.user.permissions || [];
 
 
     const handleDelete = (id, name) => {
@@ -195,12 +197,15 @@ export default function CardView({ projects = [] }) {
     return (
         <DashboardLayout>
             <div className="min-h-screen bg-gray-100 px-8 py-6">
-
                 {/* Breadcrumb */}
                 <nav className="flex items-center gap-1.5 text-sm mb-3">
-                    <Link href="#" className="text-blue-600 hover:underline">Page 1</Link>
+                    <Link href="#" className="text-blue-600 hover:underline">
+                        Page 1
+                    </Link>
                     <span className="text-gray-400">›</span>
-                    <Link href="#" className="text-blue-600 hover:underline">Page 2</Link>
+                    <Link href="#" className="text-blue-600 hover:underline">
+                        Page 2
+                    </Link>
                     <span className="text-gray-400">›</span>
                     <span className="text-gray-500">Default</span>
                 </nav>
@@ -209,13 +214,16 @@ export default function CardView({ projects = [] }) {
                 <div className="flex items-center gap-4 mb-6">
                     <h1 className="text-3xl font-extrabold text-gray-900">
                         Projects
-                        <span className="ml-2 text-2xl font-bold text-gray-500">({projects.length})</span>
+                        <span className="ml-2 text-2xl font-bold text-gray-500">
+                            ({projects.length})
+                        </span>
                     </h1>
                     <Link
                         href="/projects/create"
                         className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
                     >
-                        <span className="text-lg leading-none">+</span> Add new project
+                        <span className="text-lg leading-none">+</span> Add new
+                        project
                     </Link>
                 </div>
 
@@ -223,14 +231,22 @@ export default function CardView({ projects = [] }) {
                 <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                     {/* Tabs */}
                     <div className="flex items-center gap-1 flex-wrap">
-                        {TABS.map(t => (
+                        {TABS.map((t) => (
                             <button
                                 key={t}
-                                onClick={() => { setTab(t); setPage(1); }}
+                                onClick={() => {
+                                    setTab(t);
+                                    setPage(1);
+                                }}
                                 className={`px-3 py-1.5 text-sm rounded-md font-medium transition-colors
                                     ${tab === t ? "text-blue-600 font-bold" : "text-gray-500 hover:text-gray-800"}`}
                             >
-                                {t}<span className={`ml-1 text-xs ${tab === t ? "text-blue-500" : "text-gray-400"}`}>({counts[t]})</span>
+                                {t}
+                                <span
+                                    className={`ml-1 text-xs ${tab === t ? "text-blue-500" : "text-gray-400"}`}
+                                >
+                                    ({counts[t]})
+                                </span>
                             </button>
                         ))}
                     </div>
@@ -238,14 +254,27 @@ export default function CardView({ projects = [] }) {
                     {/* Search + view toggles */}
                     <div className="flex items-center gap-2">
                         <div className="relative w-52">
-                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
+                            <svg
+                                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"
+                                />
                             </svg>
                             <input
                                 type="text"
                                 placeholder="Search projects"
                                 value={search}
-                                onChange={e => { setSearch(e.target.value); setPage(1); }}
+                                onChange={(e) => {
+                                    setSearch(e.target.value);
+                                    setPage(1);
+                                }}
                                 className="w-full pl-10 pr-3 py-2 border-gray-200 rounded-lg bg-white border !ring-0 !shadow-none"
                             />
                         </div>
@@ -253,20 +282,26 @@ export default function CardView({ projects = [] }) {
                         {/* View toggle */}
                         <div className="flex items-center gap-1">
                             {/* List view */}
-                            <Link href={route('projects.index')}>
-                                <button className={`p-2 rounded-lg border transition-colors ${currentPath === "/projects"
-                                        ? "bg-gray-800 text-white border-gray-800"
-                                        : "bg-white text-gray-500 border-gray-200"
-                                    }`}>
+                            <Link href={route("projects.index")}>
+                                <button
+                                    className={`p-2 rounded-lg border transition-colors ${
+                                        currentPath === "/projects"
+                                            ? "bg-gray-800 text-white border-gray-800"
+                                            : "bg-white text-gray-500 border-gray-200"
+                                    }`}
+                                >
                                     <List size={16} />
                                 </button>
                             </Link>
 
-                            <Link href={route('projects.card')}>
-                                <button className={`p-2 rounded-lg border transition-colors ${currentPath === "/projects/card"
-                                        ? "bg-gray-800 text-white border-gray-800"
-                                        : "bg-white text-gray-500 border-gray-200"
-                                    }`}>
+                            <Link href={route("projects.card")}>
+                                <button
+                                    className={`p-2 rounded-lg border transition-colors ${
+                                        currentPath === "/projects/card"
+                                            ? "bg-gray-800 text-white border-gray-800"
+                                            : "bg-white text-gray-500 border-gray-200"
+                                    }`}
+                                >
                                     <LayoutGrid size={16} />
                                 </button>
                             </Link>
@@ -278,12 +313,23 @@ export default function CardView({ projects = [] }) {
                 {paginated.length === 0 ? (
                     <div className="py-20 text-center text-gray-400 text-sm">
                         No projects found.{" "}
-                        <Link href="/projects/create" className="text-blue-500 hover:underline">Create one</Link>
+                        {permissions.includes("create projects") && (
+                            <Link
+                                href="/projects/create"
+                                className="text-blue-500 hover:underline"
+                            >
+                                Create one
+                            </Link>
+                        )}
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                        {paginated.map(project => (
-                            <ProjectCard key={project.id} project={project} onDelete={handleDelete} />
+                        {paginated.map((project) => (
+                            <ProjectCard
+                                key={project.id}
+                                project={project}
+                                onDelete={handleDelete}
+                            />
                         ))}
                     </div>
                 )}
@@ -292,27 +338,51 @@ export default function CardView({ projects = [] }) {
                 {filtered.length > ITEMS_PER_PAGE && (
                     <div className="flex items-center justify-between mt-6 bg-white rounded-xl px-4 py-3 shadow-sm">
                         <p className="text-sm text-gray-500">
-                            {(page - 1) * ITEMS_PER_PAGE + 1} to {Math.min(page * ITEMS_PER_PAGE, filtered.length)} Items of {filtered.length}
-                            <button onClick={() => setPage(1)} className="text-blue-500 hover:underline text-sm ml-2">
+                            {(page - 1) * ITEMS_PER_PAGE + 1} to{" "}
+                            {Math.min(page * ITEMS_PER_PAGE, filtered.length)}{" "}
+                            Items of {filtered.length}
+                            <button
+                                onClick={() => setPage(1)}
+                                className="text-blue-500 hover:underline text-sm ml-2"
+                            >
                                 View all &rsaquo;
                             </button>
                         </p>
                         <div className="flex items-center gap-1">
-                            <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-                                className="w-8 h-8 flex items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 disabled:opacity-30">‹</button>
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
-                                <button key={n} onClick={() => setPage(n)}
+                            <button
+                                onClick={() =>
+                                    setPage((p) => Math.max(1, p - 1))
+                                }
+                                disabled={page === 1}
+                                className="w-8 h-8 flex items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 disabled:opacity-30"
+                            >
+                                ‹
+                            </button>
+                            {Array.from(
+                                { length: totalPages },
+                                (_, i) => i + 1,
+                            ).map((n) => (
+                                <button
+                                    key={n}
+                                    onClick={() => setPage(n)}
                                     className={`w-8 h-8 flex items-center justify-center rounded-md text-sm font-medium
-                                        ${n === page ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-100"}`}>
+                                        ${n === page ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-100"}`}
+                                >
                                     {n}
                                 </button>
                             ))}
-                            <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                                className="w-8 h-8 flex items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 disabled:opacity-30">›</button>
+                            <button
+                                onClick={() =>
+                                    setPage((p) => Math.min(totalPages, p + 1))
+                                }
+                                disabled={page === totalPages}
+                                className="w-8 h-8 flex items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 disabled:opacity-30"
+                            >
+                                ›
+                            </button>
                         </div>
                     </div>
                 )}
-
             </div>
         </DashboardLayout>
     );

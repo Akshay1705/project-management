@@ -2,30 +2,52 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Project;
 use App\Models\Task;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class TaskController extends Controller
 {
-    public function index(){
-        $user = auth()->user();
-        $tasks = Task::with('project', 'assignedUser')
-            ->when(!$user->isAdmin(), function($query) use ($user){
+    // ─── Index ───────────────────────────────────────────────
+    public function index()
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        $tasks = Task::with(['project', 'assignedUser'])
+            ->when(!$user->hasRole('admin'), function ($query) use ($user) {
                 $query->where('assigned_to', $user->id);
             })
+            ->latest()
             ->get();
-        return inertia('Tasks/Index', ['tasks' => $tasks]);
+
+        return Inertia::render('Tasks/Index', [
+            'tasks' => $tasks,
+        ]);
     }
 
-    public function create(){
-        $projects = \App\Models\Project::all();
-        $users = \App\Models\User::all()->except(auth()->id());
-        return inertia('Tasks/Create', ['projects' => $projects, 'users' => $users]);
+    // ─── Create ──────────────────────────────────────────────
+    public function create()
+    {
+        $projects = Project::select('id', 'name')->get();
+
+        $users = User::select('id', 'name')
+            ->where('id', '!=', Auth::id())
+            ->get();
+
+        return Inertia::render('Tasks/Create', [
+            'projects' => $projects,
+            'users' => $users,
+        ]);
     }
 
-    public function store(Request $request){
-        $request->validate([
+    // ─── Store ───────────────────────────────────────────────
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'status' => 'required|in:pending,in-progress,completed',
@@ -35,27 +57,33 @@ class TaskController extends Controller
             'due_date' => 'nullable|date|after_or_equal:today',
         ]);
 
-        Task::create([
-            'title' => $request->title,
-            'description' => $request->description,
-            'status' => $request->status,
-            'priority' => $request->priority,
-            'project_id' => $request->project_id,
-            'assigned_to' => $request->assigned_to,
-            'due_date' => $request->due_date,
+        Task::create($validated);
+
+        return redirect()
+            ->route('tasks.index')
+            ->with('success', 'Task created successfully.');
+    }
+
+    // ─── Edit ────────────────────────────────────────────────
+    public function edit(Task $task)
+    {
+        $projects = Project::select('id', 'name')->get();
+
+        $users = User::select('id', 'name')
+            ->where('id', '!=', Auth::id())
+            ->get();
+
+        return Inertia::render('Tasks/Edit', [
+            'task' => $task->load('assignedUser'),
+            'projects' => $projects,
+            'users' => $users,
         ]);
-        
-        return redirect()->route('tasks.index');
     }
 
-    public function edit(Task $task){
-        $projects = \App\Models\Project::all();
-        $users = \App\Models\User::all()->except(auth()->id());
-        return inertia('Tasks/Edit', ['task' => $task, 'projects' => $projects, 'users' => $users]);
-    }
-
-    public function update(Request $request, Task $task){
-        $request->validate([
+    // ─── Update ──────────────────────────────────────────────
+    public function update(Request $request, Task $task)
+    {
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'status' => 'required|in:pending,in-progress,completed',
@@ -65,22 +93,20 @@ class TaskController extends Controller
             'due_date' => 'nullable|date|after_or_equal:today',
         ]);
 
-        // dd($request->all());
-        $task->update([
-            'title' => $request->title,
-            'description' => $request->description,
-            'status' => $request->status,
-            'priority' => $request->priority,
-            'project_id' => $request->project_id,
-            'assigned_to' => $request->assigned_to,
-            'due_date' => $request->due_date,
-        ]);
-        
-        return redirect()->route('tasks.index');
+        $task->update($validated);
+
+        return redirect()
+            ->route('tasks.index')
+            ->with('success', 'Task updated successfully.');
     }
 
-    public function destroy(Task $task){
+    // ─── Destroy ─────────────────────────────────────────────
+    public function destroy(Task $task)
+    {
         $task->delete();
-        return redirect()->route('tasks.index');
+
+        return redirect()
+            ->route('tasks.index')
+            ->with('success', 'Task deleted successfully.');
     }
 }

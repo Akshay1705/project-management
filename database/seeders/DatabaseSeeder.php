@@ -8,6 +8,8 @@ use Illuminate\Database\Seeder;
 use App\Models\Team;
 use App\Models\Client;
 use App\Models\Tag;
+use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -20,34 +22,67 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        $admin = User::firstOrCreate(
+            ['email' => 'akshay@pm.com'],
+            [
+                'name' => 'Akshay Parekh',
+                'password' => Hash::make('password'),
+            ]
+        );
+
+        $admin->assignRole('admin');
+
+        $member = User::firstOrCreate(
+            ['email' => 'member@pm.com'],
+            [
+                'name' => 'Test Member',
+                'password' => Hash::make('password'),
+            ]
+        );
+
+        $member->assignRole('member');
 
         // Teams
-        Team::insert([
-            ['name' => 'Team One', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Team Two', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Team Three', 'created_at' => now(), 'updated_at' => now()],
-        ]);
+        foreach (
+            [
+                'Team One',
+                'Team Two',
+                'Team Three',
+            ] as $team
+        ) {
+            Team::firstOrCreate([
+                'name' => $team,
+            ]);
+        }
 
         // Clients
-        Client::insert([
-            ['name' => 'Client One', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Client Two', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Client Three', 'created_at' => now(), 'updated_at' => now()],
-        ]);
+        foreach (
+            [
+                'Client One',
+                'Client Two',
+                'Client Three',
+            ] as $client
+        ) {
+            Client::firstOrCreate([
+                'name' => $client,
+            ]);
+        }
 
         // Tags
-        Tag::insert([
-            ['name' => 'Biology', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Brainlessness', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Jerry', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Neurology', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Not_the_mouse', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Rick', 'created_at' => now(), 'updated_at' => now()],
-        ]);
+        foreach (
+            [
+                'Biology',
+                'Brainlessness',
+                'Jerry',
+                'Neurology',
+                'Not_the_mouse',
+                'Rick',
+            ] as $tag
+        ) {
+            Tag::firstOrCreate([
+                'name' => $tag,
+            ]);
+        }
     }
 
 }
