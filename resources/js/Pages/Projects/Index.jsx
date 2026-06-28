@@ -97,7 +97,6 @@ export default function Index({ projects = [] }) {
     const [page, setPage] = useState(1);
     const currentPath = window.location.pathname;
 
-
     const handleDelete = (id, name) => {
         if (confirm(`Are you sure you want to delete "${name}"?`)) {
             router.delete(`/projects/${id}`, { preserveScroll: true });

@@ -25,7 +25,6 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-
     Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
     Route::get('/projects/card', [ProjectController::class, 'cardView'])->name('projects.card');
     Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.index');
@@ -34,7 +33,6 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth', 'admin'])->group(function (){
-    
     Route::get('/projects/create', [ProjectController::class, 'create'])->name('projects.create');
     Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
     Route::get('/projects/{project}/edit', [ProjectController::class, 'edit'])->name('projects.edit');

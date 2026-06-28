@@ -113,7 +113,7 @@ function FloatingInput({ label, value, onChange, type = "text", error }) {
                 <label
                     className={`absolute left-4 font-semibold tracking-tight uppercase pointer-events-none transition-all duration-150
                         ${raised
-                            ? "top-2 text-[10.24px]"
+                            ? "top-1 text-[10.24px]"
                             : "top-1/2 -translate-y-1/2 text-[12px]"
                         }
                         ${focused ? "text-blue-600" : "text-gray-500"}
@@ -130,8 +130,8 @@ function FloatingInput({ label, value, onChange, type = "text", error }) {
                     onBlur={() => setFocused(false)}
                     className={`absolute left-4 bottom-3 right-4 bg-transparent border-none outline-none ring-0 shadow-none focus:border-none focus:outline-none focus:ring-0 text-sm text-gray-900
                         ${raised
-                            ? "top-6 opacity-100"
-                            : "top-1/2 -translate-y-1/2 opacity-0"
+                            ? "top-5 opacity-100"
+                            : "top-1/2 opacity-0"
                         }
                     `}
                 />
