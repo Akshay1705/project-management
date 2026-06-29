@@ -1,146 +1,303 @@
+import { useState, useRef, useEffect, useMemo } from "react";
+import { useForm, Link } from "@inertiajs/react";
 import DashboardLayout from "@/Layouts/DashboardLayout";
-import { Link, useForm } from "@inertiajs/react";
+import { ChevronDown } from "lucide-react";
 
-const CreateTask = ({ projects, users }) => {
-    const { data, setData, post, processing, errors } = useForm({
+// ─── Floating Label Input ─────────────────────────────────────────────────────
+function FloatingInput({ label, value, onChange, type = "text", error }) {
+    const [focused, setFocused] = useState(false);
+    const raised = focused || value;
+    return (
+        <div>
+            <div
+                className={`relative h-11 pl-1 rounded-md border bg-white transition-colors
+                ${focused ? "border-blue-600 shadow-[0_0_0_5px_rgba(38,132,255,.2)]" : "border-gray-300"}`}
+            >
+                <label
+                    className={`absolute left-4 font-semibold tracking-tight uppercase pointer-events-none transition-all duration-150
+                    ${raised ? "top-2 text-[10.24px]" : "top-1/2 -translate-y-1/2 text-[12px]"}
+                    ${focused ? "text-blue-600" : "text-gray-500"}`}
+                >
+                    {label}
+                </label>
+                <input
+                    type={type}
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    onFocus={() => setFocused(true)}
+                    onBlur={() => setFocused(false)}
+                    className={`absolute left-4 bottom-3 right-4 bg-transparent border-none outline-none ring-0 shadow-none focus:border-none focus:outline-none focus:ring-0 text-sm text-gray-900
+                        ${raised ? "top-6 opacity-100" : "top-1/2 -translate-y-1/2 opacity-0"}`}
+                />
+            </div>
+            {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+        </div>
+    );
+}
+
+// ─── Floating Label Select ────────────────────────────────────────────────────
+function FloatingSelect({
+    label,
+    value,
+    onChange,
+    options,
+    error,
+    disabled = false,
+}) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef();
+    useEffect(() => {
+        const h = (e) => {
+            if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+        };
+        document.addEventListener("mousedown", h);
+        return () => document.removeEventListener("mousedown", h);
+    }, []);
+    const selectedLabel =
+        options.find((o) => String(o.value) === String(value))?.label || "";
+    return (
+        <div ref={ref} className="relative">
+            <div
+                onClick={() => !disabled && setOpen(!open)}
+                className={`relative border rounded-md bg-white px-3.5 pt-5 min-h-[46px] transition-colors
+                    ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                    ${open ? "border-blue-600 shadow-[0_0_0_5px_rgba(38,132,255,.2)]" : "border-gray-300"}`}
+            >
+                <label
+                    className={`absolute left-3.5 top-1.5 text-[10.24px] font-semibold tracking-tight uppercase pointer-events-none
+                    ${open ? "text-blue-600" : "text-gray-400"}`}
+                >
+                    {label}
+                </label>
+                <span
+                    className={`text-sm ${selectedLabel ? "text-gray-800" : "text-gray-400"}`}
+                >
+                    {selectedLabel || (disabled ? "Select project first" : "")}
+                </span>
+                <ChevronDown
+                    size={16}
+                    className={`absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`}
+                />
+            </div>
+            {open && !disabled && (
+                <div className="absolute top-[105%] left-0 right-0 bg-white border border-gray-200 rounded-md z-50 shadow-lg overflow-hidden max-h-48 overflow-y-auto">
+                    {options.length === 0 ? (
+                        <div className="px-4 py-3 text-sm text-gray-400 italic">
+                            No members in this project
+                        </div>
+                    ) : (
+                        options.map((opt, i) => (
+                            <div
+                                key={i}
+                                onClick={() => {
+                                    onChange(opt.value);
+                                    setOpen(false);
+                                }}
+                                className={`px-4 py-2.5 text-sm cursor-pointer transition-colors
+                                    ${String(opt.value) === String(value) ? "bg-blue-600 text-white" : "text-gray-800 hover:bg-gray-50"}`}
+                            >
+                                {opt.label}
+                            </div>
+                        ))
+                    )}
+                </div>
+            )}
+            {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+        </div>
+    );
+}
+
+// ─── Floating Textarea ────────────────────────────────────────────────────────
+function FloatingTextarea({ label, value, onChange, error }) {
+    const [focused, setFocused] = useState(false);
+    return (
+        <div>
+            <div
+                className={`relative border rounded-md bg-white px-3.5 pt-7 pb-2 transition-colors
+                ${focused ? "border-blue-600 shadow-[0_0_0_5px_rgba(38,132,255,.2)]" : "border-gray-300"}`}
+            >
+                <label
+                    className={`absolute left-3.5 top-1.5 text-[10.24px] font-semibold tracking-tight uppercase pointer-events-none
+                    ${focused ? "text-blue-600" : "text-gray-400"}`}
+                >
+                    {label}
+                </label>
+                <textarea
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    onFocus={() => setFocused(true)}
+                    onBlur={() => setFocused(false)}
+                    rows={4}
+                    className="w-full bg-transparent border-none outline-none ring-0 shadow-none focus:border-none focus:outline-none focus:ring-0 text-sm text-gray-800 resize-y font-sans"
+                />
+            </div>
+            {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+        </div>
+    );
+}
+
+// ─── Main Create Task ─────────────────────────────────────────────────────────
+export default function CreateTask({ projects = [], errors = {} }) {
+    const { data, setData, post, processing } = useForm({
         title: "",
         description: "",
-        status: "pending",
+        status: "todo",
         priority: "medium",
         project_id: "",
         assigned_to: "",
+        due_date: "",
     });
+
+    const set = (key) => (val) => setData(key, val);
+
+    // When project changes, reset assigned_to
+    const handleProjectChange = (val) => {
+        setData((d) => ({ ...d, project_id: val, assigned_to: "" }));
+    };
+
+    // Filter assignees to only members of selected project
+    const assigneeOptions = useMemo(() => {
+        if (!data.project_id) return [];
+        const project = projects.find(
+            (p) => String(p.id) === String(data.project_id),
+        );
+        const members = project?.users ?? [];
+        return [
+            { value: "", label: "Unassigned" },
+            ...members.map((u) => ({ value: u.id, label: u.name })),
+        ];
+    }, [data.project_id, projects]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post("/tasks");
+        post(route("tasks.store"));
     };
+
+    const projectOptions = [
+        { value: "", label: "Select a project" },
+        ...projects.map((p) => ({ value: p.id, label: p.name })),
+    ];
+
+    const statusOptions = [
+        { value: "todo", label: "Todo" },
+        { value: "draft", label: "Draft" },
+        { value: "on process", label: "On Process" },
+        { value: "in_progress", label: "In Progress" },
+        { value: "completed", label: "Completed" },
+        { value: "on-hold", label: "On Hold" },
+        { value: "urgent", label: "Urgent" },
+        { value: "close", label: "Close" },
+    ];
+
+    const priorityOptions = [
+        { value: "low", label: "Low" },
+        { value: "medium", label: "Medium" },
+        { value: "high", label: "High" },
+        { value: "urgent", label: "Urgent" },
+    ];
 
     return (
         <DashboardLayout>
-            <div className="max-w-md mx-auto mt-10">
-                <h1 className="text-2xl font-bold mb-6">Create Task</h1>
-                <Link href='/tasks' className="text-blue-500 hover:text-blue-700 mb-4 inline-block">
-                    back to task
-                </Link>
+            <div className="m-10">
+                {/* Breadcrumb */}
+                <nav className="flex items-center gap-1.5 text-sm mb-3">
+                    <Link
+                        href={route("tasks.index")}
+                        className="text-blue-600 hover:underline"
+                    >
+                        Tasks
+                    </Link>
+                    <span className="text-gray-400">›</span>
+                    <span className="text-gray-500">Create</span>
+                </nav>
 
-                <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col gap-4">
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="title">
-                            Title
-                        </label>
-                        <input
-                            type="text"
-                            name="title"
-                            value={data.title}
-                            onChange={e => setData('title', e.target.value)}
-                            placeholder="Task Title"
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        />
-                        {errors.title && <div className="text-red-500 text-xs mt-1">{errors.title}</div>}
-                    </div>
+                <h1 className="text-3xl font-black tracking-wider text-gray-900 mb-6">
+                    Create a task
+                </h1>
 
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">
-                            Description
-                        </label>
-                        <textarea
-                            name="description"
-                            value={data.description}
-                            onChange={e => setData('description', e.target.value)}
-                            placeholder="Task Description"
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        />
-                        {errors.description && <div className="text-red-500 text-xs mt-1">{errors.description}</div>}
-                    </div>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                    {/* Task Title — full width */}
+                    <FloatingInput
+                        label="TASK TITLE"
+                        value={data.title}
+                        onChange={set("title")}
+                        error={errors?.title}
+                    />
 
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="status">
-                            Status
-                        </label>
-                        <select
-                            name="status"
+                    {/* Status + Priority */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <FloatingSelect
+                            label="STATUS"
                             value={data.status}
-                            onChange={e => setData('status', e.target.value)}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        >
-                            <option value="pending">Pending</option>
-                            <option value="in-progress">In Progress</option>
-                            <option value="completed">Completed</option>
-                        </select>
-                        {errors.status && <div className="text-red-500 text-xs mt-1">{errors.status}</div>}
-                    </div>
-
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="priority">
-                            Priority
-                        </label>
-                        <select
-                            name="priority"
+                            onChange={set("status")}
+                            options={statusOptions}
+                            error={errors?.status}
+                        />
+                        <FloatingSelect
+                            label="PRIORITY"
                             value={data.priority}
-                            onChange={e => setData('priority', e.target.value)}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        >
-                            <option value="low">Low</option>
-                            <option value="medium">Medium</option>
-                            <option value="high">High</option>
-                        </select>
-                        {errors.priority && <div className="text-red-500 text-xs mt-1">{errors.priority}</div>}
+                            onChange={set("priority")}
+                            options={priorityOptions}
+                            error={errors?.priority}
+                        />
                     </div>
 
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="project_id">
-                            Project
-                        </label>
-                        <select
-                            name="project_id"
+                    {/* Project + Assign To (filtered by project members) */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <FloatingSelect
+                            label="PROJECT"
                             value={data.project_id}
-                            onChange={e => setData('project_id', e.target.value)}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        >
-                            <option value="">Select a Project</option>
-                            {projects.map(project => (
-                                <option key={project.id} value={project.id}>
-                                    {project.name}
-                                </option>
-                            ))}
-                        </select>
-                        {errors.project_id && <div className="text-red-500 text-xs mt-1">{errors.project_id}</div>}
-                    </div>
-
-                    <div>
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="assigned_to">
-                            Assign To
-                        </label>
-                        <select
-                            name="assigned_to"
+                            onChange={handleProjectChange}
+                            options={projectOptions}
+                            error={errors?.project_id}
+                        />
+                        <FloatingSelect
+                            label="ASSIGN TO"
                             value={data.assigned_to}
-                            onChange={e => setData('assigned_to', e.target.value)}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        >
-                            <option value="">Unassigned</option>
-                            {users.map(user => (
-                                <option key={user.id} value={user.id}>
-                                    {user.name}
-                                </option>
-                            ))}
-                        </select>
-                        {errors.assigned_to && <div className="text-red-500 text-xs mt-1">{errors.assigned_to}</div>}
+                            onChange={set("assigned_to")}
+                            options={assigneeOptions}
+                            error={errors?.assigned_to}
+                            disabled={!data.project_id}
+                        />
                     </div>
 
-                    <div className="flex justify-end gap-2 mt-4">
-                        <button
-                            type="button"
-                            onClick={() => window.history.back()}
-                            className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition"
+                    {/* Helper text */}
+                    {data.project_id && assigneeOptions.length <= 1 && (
+                        <p className="text-xs text-amber-600 -mt-2">
+                            ⚠ This project has no members yet. Add people to the
+                            project first.
+                        </p>
+                    )}
+
+                    {/* Due Date */}
+                    <FloatingInput
+                        label="DUE DATE"
+                        value={data.due_date}
+                        onChange={set("due_date")}
+                        type="date"
+                        error={errors?.due_date}
+                    />
+
+                    {/* Description */}
+                    <FloatingTextarea
+                        label="DESCRIPTION"
+                        value={data.description}
+                        onChange={set("description")}
+                        error={errors?.description}
+                    />
+
+                    {/* Buttons */}
+                    <div className="flex justify-end gap-4 mt-4">
+                        <Link
+                            href={route("tasks.index")}
+                            className="px-8 py-3 rounded-md border border-gray-300 bg-white text-gray-600 text-sm font-semibold hover:bg-gray-50 transition-colors"
                         >
                             Cancel
-                        </button>
-
+                        </Link>
                         <button
                             type="submit"
                             disabled={processing}
-                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50 transition"
+                            className="py-3 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors disabled:opacity-50 min-w-[200px]"
                         >
                             {processing ? "Creating..." : "Create Task"}
                         </button>
@@ -149,6 +306,4 @@ const CreateTask = ({ projects, users }) => {
             </div>
         </DashboardLayout>
     );
-};
-
-export default CreateTask;
+}

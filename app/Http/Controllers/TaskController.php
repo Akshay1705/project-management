@@ -32,15 +32,10 @@ class TaskController extends Controller
     // ─── Create ──────────────────────────────────────────────
     public function create()
     {
-        $projects = Project::select('id', 'name')->get();
-
-        $users = User::select('id', 'name')
-            ->where('id', '!=', Auth::id())
-            ->get();
+        $projects = Project::with('users')->select('id', 'name')->get();
 
         return Inertia::render('Tasks/Create', [
             'projects' => $projects,
-            'users' => $users,
         ]);
     }
 
@@ -50,8 +45,8 @@ class TaskController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'status' => 'required|in:pending,in-progress,completed',
-            'priority' => 'required|in:low,medium,high',
+            'status' => 'required|in:todo,draft,on process,in_progress,completed,on-hold,urgent,close',
+            'priority' => 'required|in:low,medium,high,urgent',
             'project_id' => 'required|exists:projects,id',
             'assigned_to' => 'nullable|exists:users,id',
             'due_date' => 'nullable|date|after_or_equal:today',
@@ -67,16 +62,11 @@ class TaskController extends Controller
     // ─── Edit ────────────────────────────────────────────────
     public function edit(Task $task)
     {
-        $projects = Project::select('id', 'name')->get();
-
-        $users = User::select('id', 'name')
-            ->where('id', '!=', Auth::id())
-            ->get();
+        $projects = Project::with('users')->select('id', 'name')->get();
 
         return Inertia::render('Tasks/Edit', [
-            'task' => $task->load('assignedUser'),
+            'task'     => $task->load('assignedUser', 'project'),
             'projects' => $projects,
-            'users' => $users,
         ]);
     }
 
@@ -86,11 +76,11 @@ class TaskController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'status' => 'required|in:pending,in-progress,completed',
-            'priority' => 'required|in:low,medium,high',
             'project_id' => 'required|exists:projects,id',
             'assigned_to' => 'nullable|exists:users,id',
             'due_date' => 'nullable|date|after_or_equal:today',
+            'status' => 'required|in:todo,draft,on process,in_progress,completed,on-hold,urgent,close',
+            'priority' => 'required|in:low,medium,high,urgent',
         ]);
 
         $task->update($validated);

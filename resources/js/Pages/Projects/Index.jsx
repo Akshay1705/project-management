@@ -4,7 +4,6 @@ import DashboardLayout from "@/Layouts/DashboardLayout";
 import { List, LayoutGrid } from "lucide-react";
 import ProjectModal from "@/Components/ProjectModal";
 
-
 // ─── Status badge config ──────────────────────────────────────────────────────
 const STATUS_STYLES = {
     completed: "border border-green-400 text-green-600 bg-white",
@@ -12,7 +11,7 @@ const STATUS_STYLES = {
     ongoing: "border border-blue-400 text-blue-600 bg-white",
     "on-hold": "border border-orange-400 text-orange-500 bg-white",
     inactive: "border border-orange-400 text-orange-500 bg-white",
-    cancelled: "border border-gray-400 text-gray-500 bg-white",
+    cancelled: "border border-gray-400 text-gray-900 bg-white",
     critical: "border border-red-400 text-red-500 bg-white",
     postponed: "border border-purple-400 text-purple-500 bg-white",
     finished: "border border-green-400 text-green-600 bg-white",
@@ -21,7 +20,9 @@ const STATUS_STYLES = {
 function StatusBadge({ status }) {
     const s = status?.toLowerCase() || "active";
     return (
-        <span className={`px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wide ${STATUS_STYLES[s] || "border border-gray-300 text-gray-500 bg-white"}`}>
+        <span
+            className={`px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wide ${STATUS_STYLES[s] || "border border-gray-300 text-gray-900 bg-white"}`}
+        >
             {status}
         </span>
     );
@@ -31,7 +32,13 @@ function StatusBadge({ status }) {
 function AvatarStack({ users = [] }) {
     const visible = users.slice(0, 3);
     const extra = users.length - 3;
-    const colors = ["bg-blue-400", "bg-pink-400", "bg-orange-400", "bg-green-400", "bg-purple-400"];
+    const colors = [
+        "bg-blue-400",
+        "bg-pink-400",
+        "bg-orange-400",
+        "bg-green-400",
+        "bg-purple-400",
+    ];
     return (
         <div className="flex items-center -space-x-2">
             {visible.map((u, i) => (
@@ -55,12 +62,22 @@ function AvatarStack({ users = [] }) {
 // ─── Progress bar ─────────────────────────────────────────────────────────────
 function ProgressBar({ done, total }) {
     const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-    const color = pct === 100 ? "bg-green-500" : pct > 50 ? "bg-green-400" : "bg-green-300";
+    const color =
+        pct === 100
+            ? "bg-green-500"
+            : pct > 50
+              ? "bg-green-400"
+              : "bg-green-300";
     return (
         <div>
-            <span className="text-xs text-gray-500">{done} / {total}</span>
+            <span className="text-xs text-gray-900">
+                {done} / {total}
+            </span>
             <div className="mt-1 h-1 w-24 bg-gray-200 rounded-full overflow-hidden">
-                <div className={`h-full ${color} rounded-full`} style={{ width: `${pct}%` }} />
+                <div
+                    className={`h-full ${color} rounded-full`}
+                    style={{ width: `${pct}%` }}
+                />
             </div>
         </div>
     );
@@ -69,9 +86,17 @@ function ProgressBar({ done, total }) {
 // ─── Sort icon ────────────────────────────────────────────────────────────────
 function SortIcon({ field, sortField, sortDir }) {
     return (
-        <span className="ml-1 inline-flex flex-col leading-none text-gray-400">
-            <span className={`text-[9px] ${sortField === field && sortDir === "asc" ? "text-blue-600" : ""}`}>▲</span>
-            <span className={`text-[9px] ${sortField === field && sortDir === "desc" ? "text-blue-600" : ""}`}>▼</span>
+        <span className="inline-flex flex-col leading-none text-gray-400">
+            <span
+                className={`text-[7px] ${sortField === field && sortDir === "asc" ? "text-blue-600" : ""}`}
+            >
+                ▲
+            </span>
+            <span
+                className={`text-[7px] ${sortField === field && sortDir === "desc" ? "text-blue-600" : ""}`}
+            >
+                ▼
+            </span>
         </span>
     );
 }
@@ -80,15 +105,16 @@ function SortIcon({ field, sortField, sortDir }) {
 const TABS = ["All", "Ongoing", "Cancelled", "Finished", "Postponed"];
 
 const TAB_MATCH = {
-    ongoing: p => ["active", "ongoing"].includes(p.status?.toLowerCase()),
-    cancelled: p => p.status?.toLowerCase() === "cancelled",
-    finished: p => ["completed", "finished"].includes(p.status?.toLowerCase()),
-    postponed: p => ["on-hold", "postponed"].includes(p.status?.toLowerCase()),
+    ongoing: (p) => ["active", "ongoing"].includes(p.status?.toLowerCase()),
+    cancelled: (p) => p.status?.toLowerCase() === "cancelled",
+    finished: (p) =>
+        ["completed", "finished"].includes(p.status?.toLowerCase()),
+    postponed: (p) =>
+        ["on-hold", "postponed"].includes(p.status?.toLowerCase()),
 };
 
 // ─── Main Index ───────────────────────────────────────────────────────────────
 const ITEMS_PER_PAGE = 6;
-
 
 export default function Index({ projects = [] }) {
     const [tab, setTab] = useState("All");
@@ -108,19 +134,26 @@ export default function Index({ projects = [] }) {
     };
 
     const handleSort = (field) => {
-        if (sortField === field) setSortDir(d => d === "asc" ? "desc" : "asc");
-        else { setSortField(field); setSortDir("asc"); }
+        if (sortField === field)
+            setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+        else {
+            setSortField(field);
+            setSortDir("asc");
+        }
         setPage(1);
     };
 
     // Tab counts
-    const counts = useMemo(() => ({
-        All: projects.length,
-        Ongoing: projects.filter(TAB_MATCH.ongoing).length,
-        Cancelled: projects.filter(TAB_MATCH.cancelled).length,
-        Finished: projects.filter(TAB_MATCH.finished).length,
-        Postponed: projects.filter(TAB_MATCH.postponed).length,
-    }), [projects]);
+    const counts = useMemo(
+        () => ({
+            All: projects.length,
+            Ongoing: projects.filter(TAB_MATCH.ongoing).length,
+            Cancelled: projects.filter(TAB_MATCH.cancelled).length,
+            Finished: projects.filter(TAB_MATCH.finished).length,
+            Postponed: projects.filter(TAB_MATCH.postponed).length,
+        }),
+        [projects],
+    );
 
     // Filter → search → sort → paginate
     const filtered = useMemo(() => {
@@ -135,13 +168,14 @@ export default function Index({ projects = [] }) {
         // Search
         if (search.trim()) {
             const q = search.toLowerCase();
-            list = list.filter(p => p.name?.toLowerCase().includes(q));
+            list = list.filter((p) => p.name?.toLowerCase().includes(q));
         }
 
         // Sort
         if (sortField) {
             list.sort((a, b) => {
-                let av = a[sortField] ?? "", bv = b[sortField] ?? "";
+                let av = a[sortField] ?? "",
+                    bv = b[sortField] ?? "";
                 if (typeof av === "string") av = av.toLowerCase();
                 if (typeof bv === "string") bv = bv.toLowerCase();
                 if (av < bv) return sortDir === "asc" ? -1 : 1;
@@ -154,15 +188,24 @@ export default function Index({ projects = [] }) {
     }, [projects, tab, search, sortField, sortDir]);
 
     const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-    const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+    const paginated = filtered.slice(
+        (page - 1) * ITEMS_PER_PAGE,
+        page * ITEMS_PER_PAGE,
+    );
 
     const ThCol = ({ field, label }) => (
         <th
-            className="px-4 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider cursor-pointer select-none whitespace-nowrap hover:text-gray-700"
+            className="px-4 py-4 text-left text-[11px] font-bold text-gray-900 uppercase tracking-wider cursor-pointer select-none whitespace-nowrap"
             onClick={() => handleSort(field)}
         >
-            {label}
-            <SortIcon field={field} sortField={sortField} sortDir={sortDir} />
+            <div className="flex items-center gap-1">
+                {label}
+                <SortIcon
+                    field={field}
+                    sortField={sortField}
+                    sortDir={sortDir}
+                />
+            </div>
         </th>
     );
 
@@ -174,19 +217,19 @@ export default function Index({ projects = [] }) {
                     <Link href="#" className="text-blue-600 hover:underline">
                         Page 1
                     </Link>
-                    <span className="text-gray-400">›</span>
+                    <span className="text-gray-600">›</span>
                     <Link href="#" className="text-blue-600 hover:underline">
                         Page 2
                     </Link>
-                    <span className="text-gray-400">›</span>
-                    <span className="text-gray-500">Default</span>
+                    <span className="text-gray-600">›</span>
+                    <span className="text-gray-900">Default</span>
                 </nav>
 
                 {/* Title row */}
                 <div className="flex items-center gap-4 mb-6">
                     <h1 className="text-3xl font-extrabold text-gray-900">
                         Projects
-                        <span className="ml-2 text-2xl font-bold text-gray-500">
+                        <span className="ml-2 text-2xl font-bold text-gray-900">
                             ({projects.length})
                         </span>
                     </h1>
@@ -216,12 +259,12 @@ export default function Index({ projects = [] }) {
                                     ${
                                         tab === t
                                             ? "text-blue-600 font-bold"
-                                            : "text-gray-500 hover:text-gray-800"
+                                            : "text-gray-900 hover:text-gray-800"
                                     }`}
                             >
                                 {t}
                                 <span
-                                    className={`ml-1 text-xs ${tab === t ? "text-blue-500" : "text-gray-400"}`}
+                                    className={`ml-1 text-xs ${tab === t ? "text-blue-500" : "text-gray-600"}`}
                                 >
                                     ({counts[t]})
                                 </span>
@@ -233,7 +276,7 @@ export default function Index({ projects = [] }) {
                     <div className="flex items-center gap-2">
                         <div className="relative w-52">
                             <svg
-                                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600"
                                 fill="none"
                                 stroke="currentColor"
                                 strokeWidth={2}
@@ -258,39 +301,64 @@ export default function Index({ projects = [] }) {
                         </div>
 
                         {/* View toggle */}
-                        <div className="flex items-center gap-1">
-                            {/* List view */}
-                            <Link href={route("projects.index")}>
-                                <button
-                                    className={`p-2 rounded-lg border transition-colors ${
-                                        currentPath === "/projects"
-                                            ? "bg-gray-800 text-white border-gray-800"
-                                            : "bg-white text-gray-500 border-gray-200"
-                                    }`}
+                        <div className="flex items-center p-0.5 gap-0.5">
+                            <Link
+                                href="/projects"
+                                className={`p-2 rounded-md transition-colors tooltip-group relative
+            ${
+                currentPath === "/projects"
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-600 hover:text-gray-600 hover:bg-gray-100"
+            }`}
+                            >
+                                {/* List icon */}
+                                <svg
+                                    className="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth={2}
+                                    viewBox="0 0 24 24"
                                 >
-                                    <List size={16} />
-                                </button>
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                                    />
+                                </svg>
                             </Link>
 
-                            <Link href={route("projects.card")}>
-                                <button
-                                    className={`p-2 rounded-lg border transition-colors ${
-                                        currentPath === "/projects/card"
-                                            ? "bg-gray-800 text-white border-gray-800"
-                                            : "bg-white text-gray-500 border-gray-200"
-                                    }`}
+                            <Link
+                                href="/projects/card"
+                                className={`p-2 rounded-md transition-colors relative
+            ${
+                currentPath === "/projects/card"
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-600 hover:text-gray-600 hover:bg-gray-100"
+            }`}
+                            >
+                                {/* Grid icon */}
+                                <svg
+                                    className="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth={2}
+                                    viewBox="0 0 24 24"
                                 >
-                                    <LayoutGrid size={16} />
-                                </button>
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M4 5h6v6H4zm10 0h6v6h-6zM4 15h6v6H4zm10 0h6v6h-6z"
+                                    />
+                                </svg>
                             </Link>
                         </div>
                     </div>
                 </div>
 
                 {/* Table */}
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div className="overflow-hidden">
                     {paginated.length === 0 ? (
-                        <div className="py-20 text-center text-gray-400 text-sm">
+                        <div className="py-20 text-center text-gray-600 text-sm">
                             No projects found.{" "}
                             {permissions.includes("create projects") && (
                                 <Link
@@ -303,10 +371,10 @@ export default function Index({ projects = [] }) {
                         </div>
                     ) : (
                         <table className="w-full">
-                            <thead className="border-b border-gray-100 bg-gray-50">
+                            <thead className="border-b-2 border-t-2 border-gray-200">
                                 <tr>
                                     <ThCol field="name" label="Project Name" />
-                                    <th className="px-4 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                                    <th className="px-4 py-3 text-left text-[11px] font-bold text-gray-900 uppercase tracking-wider">
                                         Assignees
                                     </th>
                                     <ThCol
@@ -314,22 +382,19 @@ export default function Index({ projects = [] }) {
                                         label="Start Date"
                                     />
                                     <ThCol field="end_date" label="Deadline" />
-                                    <th className="px-4 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                                    <th className="px-4 py-3 text-left text-[11px] font-bold text-gray-900 uppercase tracking-wider">
                                         Task
                                     </th>
-                                    <th className="px-4 py-3 text-left text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                                    <th className="px-4 py-3 text-left text-[11px] font-extrabold text-gray-900 uppercase tracking-wider">
                                         Progress
                                     </th>
                                     <ThCol field="status" label="Status" />
-                                    <th className="px-4 py-3" />
+                                    <th className="px-4" />
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100">
+                            <tbody className="divide-y divide-gray-200">
                                 {paginated.map((project) => (
-                                    <tr
-                                        key={project.id}
-                                        className="hover:bg-gray-50 transition-colors"
-                                    >
+                                    <tr key={project.id}>
                                         {/* Project Name */}
                                         <td className="px-4 py-4">
                                             <button
@@ -382,7 +447,7 @@ export default function Index({ projects = [] }) {
                                         </td>
 
                                         {/* Task count */}
-                                        <td className="px-4 py-4 text-sm text-gray-700">
+                                        <td className="px-4 py-4 text-sm text-gray-900">
                                             {project.tasks_count ??
                                                 project.tasks?.length ??
                                                 0}
@@ -418,7 +483,7 @@ export default function Index({ projects = [] }) {
                                                 ) && (
                                                     <Link
                                                         href={`/projects/${project.id}/edit`}
-                                                        className="text-xs text-gray-500 hover:text-blue-600 font-medium transition-colors"
+                                                        className="text-xs text-gray-900 hover:text-blue-600 font-medium transition-colors"
                                                     >
                                                         Edit
                                                     </Link>
@@ -433,7 +498,7 @@ export default function Index({ projects = [] }) {
                                                                 project.name,
                                                             )
                                                         }
-                                                        className="text-xs text-gray-500 hover:text-red-600 font-medium transition-colors"
+                                                        className="text-xs text-gray-900 hover:text-red-600 font-medium transition-colors"
                                                     >
                                                         Delete
                                                     </button>
@@ -448,8 +513,9 @@ export default function Index({ projects = [] }) {
 
                     {/* Pagination */}
                     {filtered.length > 0 && (
-                        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
-                            <p className="text-sm text-gray-500">
+                        <div className="flex items-center justify-between px-4 py-3 border-t-2 border-b-2 border-gray-200">
+                            {" "}
+                            <p className="text-sm text-gray-900">
                                 {(page - 1) * ITEMS_PER_PAGE + 1} to{" "}
                                 {Math.min(
                                     page * ITEMS_PER_PAGE,
@@ -469,7 +535,7 @@ export default function Index({ projects = [] }) {
                                         setPage((p) => Math.max(1, p - 1))
                                     }
                                     disabled={page === 1}
-                                    className="w-8 h-8 flex items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 disabled:opacity-30 transition-colors"
+                                    className="w-8 h-8 flex items-center justify-center rounded-md text-gray-900 hover:bg-gray-100 disabled:opacity-30 transition-colors"
                                 >
                                     ‹
                                 </button>
@@ -497,7 +563,7 @@ export default function Index({ projects = [] }) {
                                         )
                                     }
                                     disabled={page === totalPages}
-                                    className="w-8 h-8 flex items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 disabled:opacity-30 transition-colors"
+                                    className="w-8 h-8 flex items-center justify-center rounded-md text-gray-900 hover:bg-gray-100 disabled:opacity-30 transition-colors"
                                 >
                                     ›
                                 </button>

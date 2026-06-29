@@ -3,47 +3,129 @@ import { Link, router } from "@inertiajs/react";
 import Dropdown from "@/Components/Dropdown";
 import Logo from "@/assets/logo_pm.png";
 import { usePage } from "@inertiajs/react";
+import NotificationModal from "@/Components/NotificationModal";
+import { useRef } from "react";
 
 // ─── Icons (inline SVG to avoid any icon lib dependency) ──────────────────────
 const Icon = {
     Folder: () => (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
+        <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            viewBox="0 0 24 24"
+        >
+            <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"
+            />
         </svg>
     ),
     Task: () => (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+        <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            viewBox="0 0 24 24"
+        >
+            <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+            />
         </svg>
     ),
     ChevronDown: () => (
-        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        <svg
+            className="w-3.5 h-3.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            viewBox="0 0 24 24"
+        >
+            <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19 9l-7 7-7-7"
+            />
         </svg>
     ),
     ChevronRight: () => (
-        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        <svg
+            className="w-3.5 h-3.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            viewBox="0 0 24 24"
+        >
+            <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 5l7 7-7 7"
+            />
         </svg>
     ),
     Search: () => (
-        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
+        <svg
+            className="w-4 h-4 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            viewBox="0 0 24 24"
+        >
+            <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z"
+            />
         </svg>
     ),
     Bell: () => (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            viewBox="0 0 24 24"
+        >
+            <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+            />
         </svg>
     ),
     Grid: () => (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 12h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4z" />
+        <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            viewBox="0 0 24 24"
+        >
+            <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 6h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 12h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4z"
+            />
         </svg>
     ),
     Collapse: () => (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M11 19l-7-7 7-7M18 19l-7-7 7-7" />
+        <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            viewBox="0 0 24 24"
+        >
+            <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M11 19l-7-7 7-7M18 19l-7-7 7-7"
+            />
         </svg>
     ),
 };
@@ -51,7 +133,9 @@ const Icon = {
 // ─── Single nav item ──────────────────────────────────────────────────────────
 function NavItem({ item, currentPath }) {
     const hasChildren = item.children?.length > 0;
-    const isChildActive = hasChildren && item.children.some(c => currentPath.startsWith(c.href));
+    const isChildActive =
+        hasChildren &&
+        item.children.some((c) => currentPath.startsWith(c.href));
     const [open, setOpen] = useState(isChildActive);
 
     if (!hasChildren) {
@@ -60,11 +144,15 @@ function NavItem({ item, currentPath }) {
             <Link
                 href={item.href}
                 className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                    ${isActive
-                        ? "bg-blue-50 text-blue-600"
-                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"}`}
+                    ${
+                        isActive
+                            ? "bg-blue-50 text-blue-600"
+                            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                    }`}
             >
-                <span className={isActive ? "text-blue-500" : "text-gray-400"}>{item.icon}</span>
+                <span className={isActive ? "text-blue-500" : "text-gray-400"}>
+                    {item.icon}
+                </span>
                 {item.label}
             </Link>
         );
@@ -75,29 +163,41 @@ function NavItem({ item, currentPath }) {
             <button
                 onClick={() => setOpen(!open)}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                    ${isChildActive
-                        ? "text-blue-600"
-                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"}`}
+                    ${
+                        isChildActive
+                            ? "text-blue-600"
+                            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                    }`}
             >
-                <span className={isChildActive ? "text-blue-500" : "text-gray-400"}>{item.icon}</span>
+                <span
+                    className={
+                        isChildActive ? "text-blue-500" : "text-gray-400"
+                    }
+                >
+                    {item.icon}
+                </span>
                 <span className="flex-1 text-left">{item.label}</span>
-                <span className={`transition-transform duration-200 ${open ? "rotate-180" : ""} text-gray-400`}>
+                <span
+                    className={`transition-transform duration-200 ${open ? "rotate-180" : ""} text-gray-400`}
+                >
                     <Icon.ChevronDown />
                 </span>
             </button>
 
             {open && (
                 <div className="ml-7 mt-0.5 flex flex-col gap-0.5 border-l border-gray-200 pl-3">
-                    {item.children.map(child => {
+                    {item.children.map((child) => {
                         const isActive = currentPath === child.href;
                         return (
                             <Link
                                 key={child.href}
                                 href={child.href}
                                 className={`block px-2 py-1.5 rounded-md text-sm transition-colors
-                                    ${isActive
-                                        ? "text-blue-600 font-semibold"
-                                        : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"}`}
+                                    ${
+                                        isActive
+                                            ? "text-blue-600 font-semibold"
+                                            : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
+                                    }`}
                             >
                                 {child.label}
                             </Link>
@@ -116,6 +216,9 @@ export default function DashboardLayout({ children }) {
     const currentPath = window.location.pathname;
     const [collapsed, setCollapsed] = useState(false);
     const [search, setSearch] = useState("");
+    const [hoveredItem, setHoveredItem] = useState(null);
+    const [notifOpen, setNotifOpen] = useState(false);
+    const bellRef = useRef(null);
 
     // ─── Sidebar nav data ─────────────────────────────────────────────────────────
     const permissions = auth.user?.permissions || [];
@@ -169,11 +272,13 @@ export default function DashboardLayout({ children }) {
             {/* ── Sidebar ─────────────────────────────────────────────────── */}
             <aside
                 className={`fixed left-0 top-[60px] bottom-0 z-30
-                flex flex-col border-r border-gray-200 bg-white
-                ${collapsed ? "w-16" : "w-66"}`}
+            flex flex-col border-r border-gray-200 bg-white
+            ${collapsed ? "w-16 overflow-visible" : "w-66 overflow-hidden"}`}
             >
                 {/* Nav */}
-                <nav className="flex-1 overflow-y-auto px-2  py-4 space-y-.5">
+                <nav
+                    className={`flex-1 px-2 py-4 space-y-0.5 ${collapsed ? "overflow-visible" : "overflow-y-auto"}`}
+                >
                     {!collapsed &&
                         NAV.map((item, i) => (
                             <NavItem
@@ -184,16 +289,46 @@ export default function DashboardLayout({ children }) {
                         ))}
                     {collapsed &&
                         NAV.map((item, i) => (
-                            <Link
+                            <div
                                 key={i}
-                                href={
-                                    item.href || item.children?.[0]?.href || "#"
-                                }
-                                title={item.label}
-                                className="flex items-center justify-center p-2.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+                                className="relative"
+                                onMouseEnter={() => setHoveredItem(i)}
+                                onMouseLeave={() => setHoveredItem(null)}
                             >
-                                {item.icon}
-                            </Link>
+                                <button className="flex items-center justify-center w-full p-2.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors">
+                                    {item.icon}
+                                </button>
+
+                                {hoveredItem === i && item.children && (
+                                    <>
+                                        {/* Invisible bridge fills the gap so cursor doesn't leave */}
+                                        <div className="absolute left-full top-0 w-3 h-full" />
+
+                                        <div className="absolute left-[calc(100%+12px)] top-0 z-50 w-56 rounded-xl border border-gray-200 bg-white shadow-xl">
+                                            {/* Arrow */}
+                                            <div className="absolute -left-2 top-5 w-4 h-4 rotate-45 bg-white border-l border-t border-gray-200" />
+
+                                            {/* Header */}
+                                            <div className="px-4 py-3 border-b border-gray-200 font-medium text-gray-700 text-sm">
+                                                {item.label}
+                                            </div>
+
+                                            {/* Links */}
+                                            <div className="py-1">
+                                                {item.children.map((child) => (
+                                                    <Link
+                                                        key={child.href}
+                                                        href={child.href}
+                                                        className="block px-4 py-2.5 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                                                    >
+                                                        {child.label}
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
                         ))}
                 </nav>
 
@@ -248,11 +383,22 @@ export default function DashboardLayout({ children }) {
                     {/* Right side */}
                     <div className="flex items-center gap-3">
                         {/* Notification bell */}
-                        <button className="relative p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors">
-                            <Icon.Bell />
-                            {/* Dot */}
-                            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-blue-500 ring-2 ring-white" />
-                        </button>
+                        <div className="relative">
+                            <button
+                                ref={bellRef}
+                                onClick={() => setNotifOpen(!notifOpen)}
+                                className="relative p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+                            >
+                                <Icon.Bell />
+                                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-blue-500 ring-2 ring-white" />
+                            </button>
+
+                            <NotificationModal
+                                isOpen={notifOpen}
+                                onClose={() => setNotifOpen(false)}
+                                anchorRef={bellRef}
+                            />
+                        </div>
 
                         {/* Grid / apps */}
                         {/* <button className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors">

@@ -360,30 +360,55 @@ export default function CardView({ projects = [] }) {
                         </div>
 
                         {/* View toggle */}
-                        <div className="flex items-center gap-1">
-                            {/* List view */}
-                            <Link href={route("projects.index")}>
-                                <button
-                                    className={`p-2 rounded-lg border transition-colors ${
-                                        currentPath === "/projects"
-                                            ? "bg-gray-800 text-white border-gray-800"
-                                            : "bg-white text-gray-500 border-gray-200"
-                                    }`}
+                        <div className="flex items-center p-0.5 gap-0.5">
+                            <Link
+                                href="/projects"
+                                className={`p-2 rounded-md transition-colors tooltip-group relative
+            ${
+                currentPath === "/projects"
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+            }`}
+                            >
+                                {/* List icon */}
+                                <svg
+                                    className="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth={2}
+                                    viewBox="0 0 24 24"
                                 >
-                                    <List size={16} />
-                                </button>
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                                    />
+                                </svg>
                             </Link>
 
-                            <Link href={route("projects.card")}>
-                                <button
-                                    className={`p-2 rounded-lg border transition-colors ${
-                                        currentPath === "/projects/card"
-                                            ? "bg-gray-800 text-white border-gray-800"
-                                            : "bg-white text-gray-500 border-gray-200"
-                                    }`}
+                            <Link
+                                href="/projects/card"
+                                className={`p-2 rounded-md transition-colors relative
+            ${
+                currentPath === "/projects/card"
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+            }`}
+                            >
+                                {/* Grid icon */}
+                                <svg
+                                    className="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth={2}
+                                    viewBox="0 0 24 24"
                                 >
-                                    <LayoutGrid size={16} />
-                                </button>
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M4 5h6v6H4zm10 0h6v6h-6zM4 15h6v6H4zm10 0h6v6h-6z"
+                                    />
+                                </svg>
                             </Link>
                         </div>
                     </div>
