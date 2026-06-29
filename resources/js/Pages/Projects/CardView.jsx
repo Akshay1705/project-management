@@ -2,6 +2,8 @@ import { useState, useMemo } from "react";
 import { usePage, Link, router } from "@inertiajs/react";
 import DashboardLayout from "@/Layouts/DashboardLayout";
 import { List, LayoutGrid } from "lucide-react";
+import ProjectModal from "@/Components/ProjectModal";
+
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
 const STATUS_STYLES = {
@@ -55,27 +57,55 @@ const TAB_MATCH = {
 };
 
 // ─── Single Project Card ──────────────────────────────────────────────────────
-function ProjectCard({ project, onDelete }) {
+function ProjectCard({ project, onDelete, onOpen }) {
     const st = getStatus(project.status);
     const total = project.tasks_count ?? 0;
     const done = project.completed_tasks_count ?? 0;
     const pct = total > 0 ? Math.round((done / total) * 100) : 0;
 
-    const fmt = (d) => d
-        ? new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
-        : "—";
+    const fmt = (d) =>
+        d
+            ? new Date(d).toLocaleDateString("en-GB", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+              })
+            : "—";
 
     return (
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col p-5 gap-3">
-
             {/* Title */}
-            <h3 className="font-bold text-gray-900 text-base leading-snug">
-                {project.name}
-            </h3>
+            {/* Title row + > button */}
+            <div className="flex items-start justify-between gap-2">
+                <h3 className="font-bold text-gray-900 text-base leading-snug truncate">
+                    {project.name}
+                </h3>
+                <button
+                    onClick={() => onOpen(project)}
+                    className="shrink-0 h-8 w-8 rounded-lg bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center transition-colors shadow-sm"
+                    title="View details"
+                >
+                    <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2.5}
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M9 5l7 7-7 7"
+                        />
+                    </svg>
+                </button>
+            </div>
 
             {/* Status badge */}
             <div>
-                <span className={`inline-block border rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${st.badge}`}>
+                <span
+                    className={`inline-block border rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${st.badge}`}
+                >
                     {st.label}
                 </span>
             </div>
@@ -84,8 +114,18 @@ function ProjectCard({ project, onDelete }) {
             <div className="flex flex-col gap-1 text-sm text-gray-600">
                 <div className="flex items-center gap-1.5">
                     {/* person icon */}
-                    <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    <svg
+                        className="w-3.5 h-3.5 text-gray-400 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
                     </svg>
                     <span>Client :</span>
                     <span className="text-blue-500 font-medium truncate">
@@ -94,12 +134,24 @@ function ProjectCard({ project, onDelete }) {
                 </div>
                 <div className="flex items-center gap-1.5">
                     {/* budget icon */}
-                    <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M3 6h18M3 14h18M3 18h18" />
+                    <svg
+                        className="w-3.5 h-3.5 text-gray-400 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M3 10h18M3 6h18M3 14h18M3 18h18"
+                        />
                     </svg>
                     <span>Budget :</span>
                     <span className="font-medium text-gray-800">
-                        {project.budget ? `${Number(project.budget).toLocaleString()}$` : "—"}
+                        {project.budget
+                            ? `${Number(project.budget).toLocaleString()}$`
+                            : "—"}
                     </span>
                 </div>
             </div>
@@ -108,17 +160,30 @@ function ProjectCard({ project, onDelete }) {
             <div>
                 <div className="flex justify-between items-center mb-1">
                     <span className="text-xs text-gray-500">Progress</span>
-                    <span className="text-xs font-semibold text-gray-700">{pct}%</span>
+                    <span className="text-xs font-semibold text-gray-700">
+                        {pct}%
+                    </span>
                 </div>
                 <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                    <div className={`h-full ${st.bar} rounded-full transition-all`} style={{ width: `${pct}%` }} />
+                    <div
+                        className={`h-full ${st.bar} rounded-full transition-all`}
+                        style={{ width: `${pct}%` }}
+                    />
                 </div>
             </div>
 
             {/* Dates */}
             <div className="text-xs text-gray-500 flex flex-col gap-0.5">
-                <span><span className="font-medium text-gray-600">Started :</span> {fmt(project.start_date)}</span>
-                <span><span className="font-medium text-gray-600">Deadline :</span> {fmt(project.end_date)}</span>
+                <span>
+                    <span className="font-medium text-gray-600">Started :</span>{" "}
+                    {fmt(project.start_date)}
+                </span>
+                <span>
+                    <span className="font-medium text-gray-600">
+                        Deadline :
+                    </span>{" "}
+                    {fmt(project.end_date)}
+                </span>
             </div>
 
             {/* Footer: avatars + task count + actions */}
@@ -128,8 +193,18 @@ function ProjectCard({ project, onDelete }) {
                 <div className="flex items-center gap-3">
                     {/* Task count */}
                     <div className="flex items-center gap-1 text-xs text-gray-500">
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h8" />
+                        <svg
+                            className="w-3.5 h-3.5"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M4 6h16M4 10h16M4 14h8"
+                            />
                         </svg>
                         {total} Task
                     </div>
@@ -139,11 +214,15 @@ function ProjectCard({ project, onDelete }) {
                         <Link
                             href={`/projects/${project.id}/edit`}
                             className="text-xs text-gray-400 hover:text-blue-600 transition-colors"
-                        >Edit</Link>
+                        >
+                            Edit
+                        </Link>
                         <button
                             onClick={() => onDelete(project.id, project.name)}
                             className="text-xs text-gray-400 hover:text-red-500 transition-colors"
-                        >Delete</button>
+                        >
+                            Delete
+                        </button>
                     </div>
                 </div>
             </div>
@@ -162,6 +241,7 @@ export default function CardView({ projects = [] }) {
     const currentPath = window.location.pathname;
     const { auth } = usePage().props;
     const permissions = auth.user.permissions || [];
+    const [selectedProject, setSelectedProject] = useState(null);
 
 
     const handleDelete = (id, name) => {
@@ -329,6 +409,7 @@ export default function CardView({ projects = [] }) {
                                 key={project.id}
                                 project={project}
                                 onDelete={handleDelete}
+                                onOpen={setSelectedProject}
                             />
                         ))}
                     </div>
@@ -384,6 +465,12 @@ export default function CardView({ projects = [] }) {
                     </div>
                 )}
             </div>
+            {selectedProject && (
+                <ProjectModal
+                    project={selectedProject}
+                    onClose={() => setSelectedProject(null)}
+                />
+            )}
         </DashboardLayout>
     );
 }

@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { usePage, Link, router } from "@inertiajs/react";
 import DashboardLayout from "@/Layouts/DashboardLayout";
 import { List, LayoutGrid } from "lucide-react";
+import ProjectModal from "@/Components/ProjectModal";
 
 
 // ─── Status badge config ──────────────────────────────────────────────────────
@@ -98,6 +99,7 @@ export default function Index({ projects = [] }) {
     const currentPath = window.location.pathname;
     const { auth } = usePage().props;
     const permissions = auth.user.permissions || [];
+    const [selectedProject, setSelectedProject] = useState(null);
 
     const handleDelete = (id, name) => {
         if (confirm(`Are you sure you want to delete "${name}"?`)) {
@@ -290,13 +292,13 @@ export default function Index({ projects = [] }) {
                     {paginated.length === 0 ? (
                         <div className="py-20 text-center text-gray-400 text-sm">
                             No projects found.{" "}
-                            {permissions.includes('create projects') && (
-                            <Link
-                                href="/projects/create"
-                                className="text-blue-500 hover:underline"
-                            >
-                                Create one
-                            </Link>
+                            {permissions.includes("create projects") && (
+                                <Link
+                                    href="/projects/create"
+                                    className="text-blue-500 hover:underline"
+                                >
+                                    Create one
+                                </Link>
                             )}
                         </div>
                     ) : (
@@ -330,12 +332,14 @@ export default function Index({ projects = [] }) {
                                     >
                                         {/* Project Name */}
                                         <td className="px-4 py-4">
-                                            <Link
-                                                href={`/projects/${project.id}`}
-                                                className="text-blue-600 hover:underline font-medium text-sm"
+                                            <button
+                                                onClick={() =>
+                                                    setSelectedProject(project)
+                                                }
+                                                className="text-blue-600 hover:underline font-medium text-sm text-left"
                                             >
                                                 {project.name}
-                                            </Link>
+                                            </button>
                                         </td>
 
                                         {/* Assignees */}
@@ -409,26 +413,30 @@ export default function Index({ projects = [] }) {
                                         {/* Actions */}
                                         <td className="px-4 py-4">
                                             <div className="flex items-center gap-2 justify-end">
-                                                {permissions.includes('edit projects') && (
-                                                <Link
-                                                    href={`/projects/${project.id}/edit`}
-                                                    className="text-xs text-gray-500 hover:text-blue-600 font-medium transition-colors"
-                                                >
-                                                    Edit
-                                                </Link>
+                                                {permissions.includes(
+                                                    "edit projects",
+                                                ) && (
+                                                    <Link
+                                                        href={`/projects/${project.id}/edit`}
+                                                        className="text-xs text-gray-500 hover:text-blue-600 font-medium transition-colors"
+                                                    >
+                                                        Edit
+                                                    </Link>
                                                 )}
-                                                {permissions.includes('delete projects') && (
-                                                <button
-                                                    onClick={() =>
-                                                        handleDelete(
-                                                            project.id,
-                                                            project.name,
-                                                        )
-                                                    }
-                                                    className="text-xs text-gray-500 hover:text-red-600 font-medium transition-colors"
-                                                >
-                                                    Delete
-                                                </button>
+                                                {permissions.includes(
+                                                    "delete projects",
+                                                ) && (
+                                                    <button
+                                                        onClick={() =>
+                                                            handleDelete(
+                                                                project.id,
+                                                                project.name,
+                                                            )
+                                                        }
+                                                        className="text-xs text-gray-500 hover:text-red-600 font-medium transition-colors"
+                                                    >
+                                                        Delete
+                                                    </button>
                                                 )}
                                             </div>
                                         </td>
@@ -498,6 +506,12 @@ export default function Index({ projects = [] }) {
                     )}
                 </div>
             </div>
+            {selectedProject && (
+                <ProjectModal
+                    project={selectedProject}
+                    onClose={() => setSelectedProject(null)}
+                />
+            )}
         </DashboardLayout>
     );
 }

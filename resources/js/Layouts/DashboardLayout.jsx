@@ -55,7 +55,7 @@ function NavItem({ item, currentPath }) {
     const [open, setOpen] = useState(isChildActive);
 
     if (!hasChildren) {
-        const isActive = currentPath === item.href || currentPath.startsWith(item.href + "/");
+        const isActive = currentPath === item.href;
         return (
             <Link
                 href={item.href}
@@ -89,7 +89,7 @@ function NavItem({ item, currentPath }) {
             {open && (
                 <div className="ml-7 mt-0.5 flex flex-col gap-0.5 border-l border-gray-200 pl-3">
                     {item.children.map(child => {
-                        const isActive = currentPath === child.href || currentPath.startsWith(child.href + "/");
+                        const isActive = currentPath === child.href;
                         return (
                             <Link
                                 key={child.href}
@@ -131,8 +131,8 @@ export default function DashboardLayout({ children }) {
 
                 { label: "Project list view", href: "/projects" },
                 { label: "Project card view", href: "/projects/card" },
-                { label: "Project board view", href: "/projects?view=board" },
-                { label: "Project details", href: "/projects/details" },
+                // { label: "Project board view", href: "/projects?view=board" },
+                // { label: "Project details", href: "/projects/details" },
             ],
         },
 
