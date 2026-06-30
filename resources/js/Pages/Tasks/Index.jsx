@@ -4,8 +4,6 @@ import DashboardLayout from "@/Layouts/DashboardLayout";
 import TaskDrawer from "@/Components/TaskDrawer";
 import { usePage } from "@inertiajs/react";
 
-
-
 // ─── Status badge config ──────────────────────────────────────────────────────
 const STATUS_STYLES = {
   draft: "border-blue-300 text-blue-500",
@@ -17,13 +15,6 @@ const STATUS_STYLES = {
   closed: "border-gray-400 text-gray-500",
   completed: "border-green-400 text-green-600",
   "on-hold": "border-yellow-400 text-yellow-600",
-};
-
-const PRIORITY_COLORS = {
-  low: "text-gray-400",
-  medium: "text-orange-400",
-  high: "text-red-500",
-  urgent: "text-red-600",
 };
 
 function StatusBadge({ status }) {
@@ -82,8 +73,7 @@ const fmtTime = (d) => {
 // ─── Single Task Row ──────────────────────────────────────────────────────────
 function TaskRow({ task, checked, onCheck, onDelete, onOpen }) {
     const commentCount = task.comments_count ?? 0;
-    const subtaskCount = 0; // extend if you add subtasks later
-    const priorityColor = PRIORITY_COLORS[task.priority?.toLowerCase()] ?? "text-gray-400";
+    const subtaskCount = 0;
 
     return (
         <div
@@ -218,6 +208,7 @@ export default function Index({ tasks = [] }) {
     return list;
   }, [tasks, search, sortBy]);
 
+  // console.log(tasks[0]);
   return (
       <DashboardLayout>
           <div className="min-h-screen bg-gray-100 px-8 py-6">
@@ -297,10 +288,7 @@ export default function Index({ tasks = [] }) {
                       {sortOpen && (
                           <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 w-40 overflow-hidden">
                               {[
-                                  {
-                                      value: "created_at",
-                                      label: "Newest first",
-                                  },
+                                  { value: "created_at", label: "Newest first" },
                                   { value: "title", label: "Title A–Z" },
                                   { value: "due_date", label: "Due date" },
                                   { value: "priority", label: "Priority" },

@@ -17,7 +17,7 @@ class TaskController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        $tasks = Task::with(['project', 'assignedUser'])
+        $tasks = Task::with(['project', 'assignedUser', 'subtasks'])
             ->when(!$user->hasRole('admin'), function ($query) use ($user) {
                 $query->where('assigned_to', $user->id);
             })

@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { usePage, Link, router } from "@inertiajs/react";
 import DashboardLayout from "@/Layouts/DashboardLayout";
-import { List, LayoutGrid } from "lucide-react";
 import ProjectModal from "@/Components/ProjectModal";
 
 // ─── Status badge config ──────────────────────────────────────────────────────
@@ -305,11 +304,11 @@ export default function Index({ projects = [] }) {
                             <Link
                                 href="/projects"
                                 className={`p-2 rounded-md transition-colors tooltip-group relative
-            ${
-                currentPath === "/projects"
-                    ? "bg-blue-600 text-white"
-                    : "text-gray-600 hover:text-gray-600 hover:bg-gray-100"
-            }`}
+                                ${
+                                    currentPath === "/projects"
+                                        ? "bg-blue-600 text-white"
+                                        : "text-gray-600 hover:text-gray-600 hover:bg-gray-100"
+                                }`}
                             >
                                 {/* List icon */}
                                 <svg
@@ -330,11 +329,11 @@ export default function Index({ projects = [] }) {
                             <Link
                                 href="/projects/card"
                                 className={`p-2 rounded-md transition-colors relative
-            ${
-                currentPath === "/projects/card"
-                    ? "bg-blue-600 text-white"
-                    : "text-gray-600 hover:text-gray-600 hover:bg-gray-100"
-            }`}
+                                ${
+                                    currentPath === "/projects/card"
+                                        ? "bg-blue-600 text-white"
+                                        : "text-gray-600 hover:text-gray-600 hover:bg-gray-100"
+                                }`}
                             >
                                 {/* Grid icon */}
                                 <svg

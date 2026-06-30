@@ -20,4 +20,9 @@ class Task extends Model
     public function comments(){
         return $this->hasMany(Comment::class);
     }
+
+    public function subtasks()
+    {
+        return $this->hasMany(Subtask::class);
+    }
 }
